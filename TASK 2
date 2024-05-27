@@ -1,117 +1,54 @@
-import java.util.*;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.Scanner;
 
-public class task2 {
+class Grade {
+    public String getGrade(int averagePercentage) {
+        switch (averagePercentage / 10) {
+            case 10:
+                return "A+";
+            case 9:
+                return "A";
+            case 8:
+                return "B+";
+            case 7:
+                return "B";
+            case 6:
+                return "C";
+            case 5:
+                return "D";
+            default:
+                return "F";
+        }
+    }
+}
+
+public class Main {
     public static void main(String[] args) {
+        Grade gradeCalculator = new Grade();
         Scanner scanner = new Scanner(System.in);
-        String inputText = "";
 
-        System.out.print("Enter '1' to input text manually or '2' to specify a file for word count: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume the newline character
-        System.out.println();
+        // Taking input for the number of subjects
+        System.out.println("Enter the number of subjects:");
+        int totalSubjects = scanner.nextInt();
+        int totalMarks = 0;
 
-        if (choice == 1) {
-            System.out.println("Enter the text for word counting:");
-            inputText = scanner.nextLine();
-        } else if (choice == 2) {
-            System.out.println("Enter the path to the file you want to count words from:");
-            String filePath = scanner.nextLine();
-
-            try {
-                inputText = readFile(filePath);
-            } catch (FileNotFoundException e) {
-                System.err.println("Error: File not found.");
-                System.exit(1);
-            }
-        } else {
-            System.err.println("Invalid choice. Please enter '1' or '2'.");
-            System.exit(1);
+        // Taking and adding all the marks
+        for (int i = 0; i < totalSubjects; i++) {
+            System.out.println("Enter the marks obtained in subject " + (i + 1) + ":");
+            int marks = scanner.nextInt();
+            totalMarks += marks;
         }
 
-        while (true) {
-            System.out.print(
-                    "Please Enter:\n1. -> To know the Total Number of Words.\n2. -> To know the frequency of all input words.\n3. -> To know the frequency of all input words except common words.\n4. -> To Exit : ");
-            int action = scanner.nextInt();
+        // Calculating average percentage
+        int averagePercentage = totalMarks / totalSubjects;
 
-            switch (action) {
-                case 1: {
-                    int totalWordCount = countWords(inputText);
-                    System.out.println("--->  Total Word Count: " + totalWordCount);
-                    break;
-                }
-                case 2: {
-                    Map<String, Integer> wordFrequency = getWordFrequency(inputText, false);
-                    System.out.println("--->  Total Number of Words: " + wordFrequency.size());
-                    System.out.println("Word Frequency:");
-                    for (Map.Entry<String, Integer> entry : wordFrequency.entrySet()) {
-                        System.out.println(entry.getKey() + ": " + entry.getValue());
-                    }
-                    break;
-                }
-                case 3: {
-                    Map<String, Integer> wordFrequency = getWordFrequency(inputText, true);
-                    System.out.println("--->  Total Number of Words (except common words): " + wordFrequency.size());
-                    System.out.println("The Common Words are : { \"a\", \"and\", \"as\", \"in\", \"is\", \"it\", \"of\", \"that\", \"the\", \"to\", \"with\"}");
-                    System.out.println("Word Frequency:");
-                    for (Map.Entry<String, Integer> entry : wordFrequency.entrySet()) {
-                        System.out.println(entry.getKey() + ": " + entry.getValue());
-                    }
-                    break;
-                }
-                case 4: {
-                    System.out.println("Thank You for using the program!!!\n.......Program Exiting.......");
-                    scanner.close();
-                    System.exit(0);
-                }
-                default: {
-                    System.out.println("Wrong Input!!!\nEnter Correctly...");
-                    break;
-                }
-            }
-        }
-    }
+        // Calculating grade
+        String grade = gradeCalculator.getGrade(averagePercentage);
 
-    public static int countWords(String text) {
-        String[] words = text.split("[\\s.,!?;:]+");
-        return words.length;
-    }
+        // Displaying all the data
+        System.out.println("Total marks obtained: " + totalMarks);
+        System.out.println("Percentage obtained: " + averagePercentage + "%");
+        System.out.println("Grade obtained: " + grade);
 
-    public static Map<String, Integer> getWordFrequency(String text, boolean excludeCommonWords) {
-        String[] words = text.split("[\\s.,!?;:]+");
-        Map<String, Integer> wordFrequency = new HashMap<>();
-
-        for (String word : words) {
-            word = word.toLowerCase(); // Convert to lowercase to ensure case-insensitive counts
-            if (excludeCommonWords && isCommonWord(word)) {
-                continue;
-            }
-            wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);
-        }
-
-        return wordFrequency;
-    }
-
-    public static boolean isCommonWord(String word) {
-        // Define a list of common words to ignore (stop words)
-        String[] commonWords = { "a", "and", "as", "in", "is", "it", "of", "that", "the", "to", "with" };
-        return Arrays.asList(commonWords).contains(word.toLowerCase());
-    }
-
-    public static String readFile(String filePath) throws FileNotFoundException {
-        StringBuilder content = new StringBuilder();
-        File file = new File(filePath);
-
-        try (Scanner fileScanner = new Scanner(file)) {
-            while (fileScanner.hasNextLine()) {
-                content.append(fileScanner.nextLine());
-                if (fileScanner.hasNextLine()) {
-                    content.append("\n");
-                }
-            }
-        }
-
-        return content.toString();
+        scanner.close();
     }
 }
