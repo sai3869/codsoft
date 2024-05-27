@@ -1,0 +1,65 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URI;
+import org.json.JSONObject;
+
+public class Main {
+    public static void main(String[] args) {
+        String apiKey = "8e1256d21ccad92a0547ecc30eaa1c11";
+        String apiUrl = "http://api.exchangeratesapi.io/v1/latest?access_key=" + apiKey;
+
+        try {
+            // Create a URI and URL object
+            URI uri = new URI(apiUrl);
+            URL url = uri.toURL();
+
+            // Open connection
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // Read and parse the JSON response
+            String response = getResponse(connection);
+            JSONObject json = new JSONObject(response);
+            JSONObject rates = json.getJSONObject("rates");
+
+            // Take user input for currency conversion
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("Enter the base currency (e.g., USD): ");
+            String baseCurrency = inputReader.readLine().toUpperCase();
+
+            System.out.print("Enter the target currency (e.g., EUR): ");
+            String targetCurrency = inputReader.readLine().toUpperCase();
+
+            System.out.print("Enter the amount to convert: ");
+            double amount = Double.parseDouble(inputReader.readLine());
+
+            // Perform the currency conversion
+            double convertedAmount = convertCurrency(rates, baseCurrency, targetCurrency, amount);
+
+            // Display the result
+            System.out.printf("%.2f %s = %.2f %s%n", amount, baseCurrency, convertedAmount, targetCurrency);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String getResponse(HttpURLConnection connection) throws IOException {
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+        }
+        return response.toString();
+    }
+
+    private static double convertCurrency(JSONObject rates, String baseCurrency, String targetCurrency, double amount) {
+        double baseRate = rates.getDouble(baseCurrency);
+        double targetRate = rates.getDouble(targetCurrency);
+        return amount * (targetRate / baseRate);
+    }
+}
